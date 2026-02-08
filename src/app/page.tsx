@@ -1,38 +1,26 @@
 ﻿'use client';
 
-import { useEffect } from 'react';
 import { useWalletGenerator } from '@/hooks/useWalletGenerator';
 import { GeneratorControls } from './components/GeneratorControls';
 import { WalletCard } from './components/WalletCard';
+import { WalletConnector } from './components/WalletConnector';
 
 export default function Home() {
   const { wallets, isGenerating, error, generate, count } = useWalletGenerator();
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.parent) {
-      try {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk';
-        script.onload = () => {
-          if (typeof (window as any).farcaster !== 'undefined') {
-            (window as any).farcaster.actions?.ready?.();
-          }
-        };
-        document.head.appendChild(script);
-      } catch (error) {
-        console.log('Running in standalone mode');
-      }
-    }
-  }, []);
-
   return (
     <main className='min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 pb-20'>
       <header className='border-b border-zinc-800 bg-zinc-950/50 backdrop-blur-sm sticky top-0 z-40'>
-        <div className='max-w-6xl mx-auto px-4 py-6 sm:px-6'>
-          <h1 className='text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight'>
-             Batch EVM Wallet Generator
-          </h1>
-          <p className='text-sm text-zinc-400 mt-1'>Generate secure wallets instantly on Ethereum & Base</p>
+        <div className='max-w-6xl mx-auto px-4 py-6 sm:px-6 flex items-center justify-between'>
+          <div>
+            <h1 className='text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight'>
+              Batch EVM Wallet Generator
+            </h1>
+            <p className='text-sm text-zinc-400 mt-1'>Generate secure wallets instantly on Ethereum & Base</p>
+          </div>
+          <div className='ml-4'>
+            <WalletConnector />
+          </div>
         </div>
       </header>
 
