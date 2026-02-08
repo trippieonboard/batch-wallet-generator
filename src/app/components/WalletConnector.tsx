@@ -1,79 +1,83 @@
-﻿'use client';
+'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from './ui/Button';
 
-export function WalletConnector() {
-  const [connected, setConnected] = useState(false);
-  const [account, setAccount] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+interface WalletConnectorProps {
+  onConnect?: (address: string) => void;
+  onDisconnect?: () => void;
+}
 
-  // Check if already connected on mount
+export function WalletConnector({ onConnect, onDisconnect }: WalletConnectorProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [address, setAddress] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    setMounted(true);
+    // Check if already connected
     const checkConnection = async () => {
-      if (typeof window !== 'undefined' && (window as any).ethereum) {
-        try {
-          const accounts = await (window as any).ethereum.request({
+      try {
+        if (typeof window !== 'undefined' && window.ethereum) {
+          const accounts = (await window.ethereum.request({
             method: 'eth_accounts',
-          });
-          if (accounts.length > 0) {
-            setConnected(true);
-            setAccount(accounts[0]);
+          })) as string[];
+          if (accounts && accounts.length > 0) {
+            setAddress(accounts[0]);
           }
-        } catch (err) {
-          console.log('No connected account');
         }
+      } catch (error) {
+        console.error('Error checking connection:', error);
       }
     };
-
     checkConnection();
   }, []);
 
   const connectWallet = async () => {
-    if (typeof window === 'undefined' || !(window as any).ethereum) {
-      alert('Please install a Web3 wallet (MetaMask, Coinbase Wallet, etc.)');
-      return;
-    }
-
-    setIsLoading(true);
     try {
-      const accounts = await (window as any).ethereum.request({
-        method: 'eth_requestAccounts',
-      });
-      if (accounts.length > 0) {
-        setConnected(true);
-        setAccount(accounts[0]);
+      setIsLoading(true);
+      if (typeof window !== 'undefined' && window.ethereum) {
+        const accounts = (await window.ethereum.request({
+          method: 'eth_requestAccounts',
+        })) as string[];
+        if (accounts && accounts.length > 0) {
+          setAddress(accounts[0]);
+          onConnect?.(accounts[0]);
+        }
+      } else {
+        alert('Please install MetaMask or another Web3 wallet');
       }
-    } catch (err: any) {
-      console.error('Failed to connect wallet:', err);
-      if (err.code !== 4001) {
-        // 4001 = user rejected request
-        alert('Failed to connect wallet. Please try again.');
-      }
+    } catch (error) {
+      console.error('Connection error:', error);
+      alert('Failed to connect wallet. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
   const disconnectWallet = () => {
-    setConnected(false);
-    setAccount(null);
+    setAddress(null);
+    onDisconnect?.();
   };
 
+  if (!mounted) return null;
+
+  const shortenAddress = (addr: string) => 
+    addr.slice(0, 6) + '...' + addr.slice(-4);
+
   return (
-    <div className="flex items-center gap-3">
-      {connected && account ? (
+    <div className='flex items-center gap-2'>
+      {address ? (
         <>
-          <div className="hidden sm:block">
-            <p className="text-xs text-zinc-400">Connected</p>
-            <p className="text-sm font-mono text-zinc-100 truncate">
-              {account.slice(0, 6)}...{account.slice(-4)}
-            </p>
+          <div className='glass-card px-3 py-2'>
+            <span className='text-sm font-mono text-green-400'>
+              {shortenAddress(address)}
+            </span>
           </div>
           <Button
-            variant="ghost"
+            variant='ghost'
             onClick={disconnectWallet}
-            className="text-xs px-2 py-1"
+            className='text-xs px-3 py-2'
           >
             Disconnect
           </Button>
@@ -81,10 +85,22 @@ export function WalletConnector() {
       ) : (
         <Button
           onClick={connectWallet}
-          loading={isLoading}
-          className="text-sm"
+          disabled={isLoading}
+          className='text-sm px-4 py-2 font-medium'
+          style={{
+            background: isLoading
+              ? 'rgba(16, 185, 129, 0.3)'
+              : 'linear-gradient(135deg, rgba(16, 185, 129, 0.6), rgba(16, 185, 129, 0.4))',
+          }}
         >
-          {isLoading ? 'Connecting...' : 'Connect Wallet'}
+          {isLoading ? (
+            <span className='flex items-center gap-2'>
+              <span className='inline-block w-3 h-3 border-2 border-green-400 border-t-transparent rounded-full animate-spin' />
+              Connecting...
+            </span>
+          ) : (
+            ' Connect Wallet'
+          )}
         </Button>
       )}
     </div>

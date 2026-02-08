@@ -1,67 +1,92 @@
 'use client';
 
-import { useState } from 'react';
-import { UI_CONFIG } from '@/lib/constants';
+import { useState, useCallback } from 'react';
+import { useWalletGenerator } from '@/hooks/useWalletGenerator';
 import { Button } from './ui/Button';
 
 interface GeneratorControlsProps {
-  onGenerate: (count: number) => void;
-  isLoading: boolean;
-  walletCount: number;
+  isGenerating: boolean;
 }
 
-export function GeneratorControls({ onGenerate, isLoading, walletCount }: GeneratorControlsProps) {
-  const [quantity, setQuantity] = useState<number>(UI_CONFIG.defaultWallets);
+export function GeneratorControls({ isGenerating }: GeneratorControlsProps) {
+  const [count, setCount] = useState(5);
+  const { generate } = useWalletGenerator();
 
-  const buttonText = isLoading ? 'Generating' + ' ' + quantity + ' Wallets...' : 'Generate ' + quantity + ' Wallet' + (quantity !== 1 ? 's' : '');
+  const handleGenerate = useCallback(async () => {
+    await generate(count);
+  }, [count, generate]);
+
+  const sliderBackground = 'linear-gradient(to right, rgba(16, 185, 129, 0.5) 0%, rgba(16, 185, 129, 0.5) ' + (count / 100) * 100 + '%, rgba(255, 255, 255, 0.1) ' + (count / 100) * 100 + '%, rgba(255, 255, 255, 0.1) 100%)';
 
   return (
-    <div className='card-minimal'>
-      <div className='space-y-6'>
-        {/* Title */}
-        <div>
-          <h2 className='text-lg font-semibold text-gray-900'>Generate Wallets</h2>
-          <p className='text-sm text-gray-500 mt-1'>All keys generated securely on your device</p>
-        </div>
+    <div className='glass-card sticky top-24 h-fit'>
+      <h2 className='text-lg font-semibold text-white mb-6 flex items-center gap-2'>
+        <span className='w-2 h-2 rounded-full bg-green-400 animate-pulse' />
+        Generator
+      </h2>
 
-        {/* Quantity Slider */}
-        <div>
-          <div className='flex items-center justify-between mb-4'>
-            <label htmlFor='quantity' className='text-sm font-medium text-gray-700'>
-              Number of Wallets
-            </label>
-            <span className='text-lg font-semibold text-gray-900'>{quantity}</span>
-          </div>
-          <input
-            id='quantity'
-            type='range'
-            min={UI_CONFIG.minWallets}
-            max={UI_CONFIG.maxWallets}
-            value={quantity}
-            onChange={(e) => setQuantity(Number(e.target.value))}
-            className='w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500'
-          />
-          <div className='flex justify-between text-xs text-gray-500 mt-2'>
-            <span>{UI_CONFIG.minWallets}</span>
-            <span>{UI_CONFIG.maxWallets}</span>
-          </div>
+      {/* Count Slider */}
+      <div className='space-y-3 mb-6'>
+        <label className='text-sm font-medium text-gray-300'>
+          Wallets: <span className='text-green-400 font-bold'>{count}</span>
+        </label>
+        <input
+          type='range'
+          min='1'
+          max='100'
+          value={count}
+          onChange={(e) => setCount(parseInt(e.target.value))}
+          className='w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-green-500'
+          style={{
+            background: sliderBackground,
+          }}
+        />
+        <div className='flex justify-between text-xs text-gray-500'>
+          <span>1</span>
+          <span>100</span>
         </div>
+      </div>
 
-        {/* Generate Button */}
-        <Button
-          onClick={() => onGenerate(quantity)}
-          loading={isLoading}
-          className='w-full'
-        >
-          {buttonText}
-        </Button>
+      {/* Generate Button */}
+      <Button
+        onClick={handleGenerate}
+        disabled={isGenerating}
+        className='w-full glass-button primary font-semibold py-2 mb-4 relative overflow-hidden group'
+        style={{
+          background: isGenerating
+            ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(16, 185, 129, 0.2))'
+            : 'linear-gradient(135deg, rgba(16, 185, 129, 0.7), rgba(16, 185, 129, 0.5))',
+        }}
+      >
+        <span className='relative z-10 flex items-center justify-center gap-2'>
+          {isGenerating ? (
+            <>
+              <span className='inline-block w-4 h-4 border-2 border-green-400 border-t-transparent rounded-full animate-spin' />
+              Generating...
+            </>
+          ) : (
+            <>
+              <span></span>
+              Generate Wallets
+            </>
+          )}
+        </span>
+      </Button>
 
-        {/* Info */}
-        <div className='pt-4 border-t border-gray-200'>
-          <p className='text-xs text-gray-500 leading-relaxed'>
-            <span className='font-medium text-gray-700'> Security:</span> Private keys are generated only on your device and never transmitted to any server.
-          </p>
-        </div>
+      {/* Info */}
+      <div className='space-y-2 text-xs text-gray-400 border-t border-white/10 pt-4'>
+        <p className='flex items-start gap-2'>
+          <span className='text-green-400 mt-0.5'></span>
+          <span>Generate up to 100 wallets per batch</span>
+        </p>
+        <p className='flex items-start gap-2'>
+          <span className='text-green-400 mt-0.5'></span>
+          <span>Each wallet includes address &amp; private key</span>
+        </p>
+        <p className='flex items-start gap-2'>
+          <span className='text-green-400 mt-0.5'></span>
+          <span>Secure generation on your device</span>
+        </p>
       </div>
     </div>
   );
