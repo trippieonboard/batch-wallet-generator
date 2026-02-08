@@ -1,0 +1,21 @@
+{
+  "version": "1",
+  "name": "Batch EVM Wallet Generator",
+  "description": "Generate and check EVM wallets instantly",
+  "iconUrl": "https://via.placeholder.com/256?text=⚡",
+  "homeUrl": "https://your-domain.com",
+  "splashImageUrl": "https://via.placeholder.com/1200x675?text=Wallet+Generator",
+  "splashBackgroundColor": "#09090b",
+  "accountAssociation": {
+    "header": "eyJmaWQiOiA0MzM2LCAidHlwZSI6ICJmY3N0X2hvcml6b250YWxfcHJvb2YiLCAidGltZXN0YW1wIjogIjIwMjQtMDEtMDFUMDA6MDA6MDBaIiwgInNpZ25hdHVyZSI6ICIweC4uLiJ9",
+    "payload": "eyJkb21haW4iOiAieW91ci1kb21haW4uY29tIn0=",
+    "signature": "0x..."
+  },
+  "buttons": [
+    {
+      "title": "Generate Wallets",
+      "actionType": "launch",
+      "target": "https://your-domain.com"
+    }
+  ]
+}
