@@ -1,158 +1,101 @@
-# Batch EVM Wallet Generator - Инструкции по развертыванию на Vercel
+﻿# Batch EVM Wallet Generator - Deployment Guide
 
-## 1️⃣ Подготовка GitHub репозитория
+## 1 GitHub Repository Setup
 
-```bash
+\\\ash
 cd C:\Users\klekl\batch-wallet-generator
 
-# Инициализация Git (если еще не сделано)
+# Initialize Git (if not already done)
 git init
 git add .
 git commit -m "Initial commit: Batch EVM Wallet Generator for Farcaster"
 git branch -M main
 
-# Добавить remote репозиторий (замените USERNAME)
+# Add remote repository (replace USERNAME)
 git remote add origin https://github.com/YOUR_USERNAME/batch-wallet-generator.git
 git push -u origin main
-```
+\\\
 
-## 2️⃣ Развертывание на Vercel
+## 2 Deployment on Vercel
 
-### Вариант A: Через веб-интерфейс (Рекомендуется)
+### Option A: Web Interface (Recommended)
 
-1. Перейдите на https://vercel.com/new
-2. Нажмите "Import Git Repository"
-3. Вставьте ссылку на ваш GitHub репозиторий
-4. Vercel автоматически определит Next.js проект
-5. Нажмите "Deploy"
-6. Дождитесь завершения (обычно 2-3 минуты)
+1. Go to https://vercel.com/new
+2. Click "Import Git Repository"
+3. Paste your GitHub repository URL
+4. Vercel will automatically detect the Next.js project
+5. Click "Deploy"
+6. Wait for completion (usually 2-3 minutes)
 
-### Вариант B: Через Vercel CLI
+### Option B: Vercel CLI
 
-```bash
-# Установить Vercel CLI (если нет)
+\\\ash
+# Install Vercel CLI (if needed)
 npm install -g vercel
 
-# Залогиниться в Vercel
+# Login to Vercel
 vercel login
 
-# Задеплоить проект
+# Deploy project
 vercel
 
-# Для production деплоя
+# For production deployment
 vercel --prod
-```
+\\\
 
-## 3️⃣ После развертывания
+## 3 After Deployment
 
-После успешного деплоя вы получите URL вида:
-```
+After successful deployment you'll get a URL like:
+\\\
 https://batch-wallet-generator-xxxxx.vercel.app
-```
+\\\
 
-**Скопируйте этот URL** - он нужен для следующих шагов.
+## 4 Deployment on Railway.app
 
-## 4️⃣ Интеграция с Farcaster
+1. Go to https://railway.app/new
+2. Click "Deploy from GitHub"
+3. Select your repository
+4. Railway will auto-detect Next.js
+5. Wait for build and deployment (5-10 minutes)
+6. Your app URL will be displayed in the Railway dashboard
 
-### Шаг 1: Верификация домена
+## 5 Deployment on Render.com
 
-1. Перейдите на https://warpcast.com/~/settings
-2. Перейдите в раздел "Developer Tools"
-3. Нажмите "Add Domain"
-4. Введите ваш Vercel домен
-5. Vercel должна подписать домен автоматически
+1. Go to https://render.com/new
+2. Connect your GitHub account
+3. Select "Web Service"
+4. Choose your repository
+5. Set build command: \
+pm run build\
+6. Set start command: \
+pm start\
+7. Deploy and wait for completion
 
-### Шаг 2: Обновление farcaster.json
+## 6 Docker Deployment
 
-После верификации вы получите:
-- `header` - закодированная подпись
-- `payload` - данные домена  
-- `signature` - подпись
+\\\ash
+# Build Docker image
+docker build -t batch-wallet-generator .
 
-Обновите файл `public/farcaster.json`:
+# Run container locally
+docker run -p 3000:3000 batch-wallet-generator
 
-```json
-{
-  "version": "1",
-  "name": "Batch EVM Wallet Generator",
-  "description": "Generate and check EVM wallets instantly",
-  "iconUrl": "https://YOUR_DOMAIN.vercel.app/icon.png",
-  "homeUrl": "https://YOUR_DOMAIN.vercel.app",
-  "splashImageUrl": "https://YOUR_DOMAIN.vercel.app/splash.png",
-  "splashBackgroundColor": "#09090b",
-  "accountAssociation": {
-    "header": "eyJmaWQi...",
-    "payload": "eyJkb21ha...",
-    "signature": "0x..."
-  }
-}
-```
+# Deploy to cloud (AWS, Google Cloud, etc.)
+docker push your-registry/batch-wallet-generator
+\\\
 
-### Шаг 3: Пуш обновлений
+## 7 Environment Variables
 
-```bash
-git add public/farcaster.json
-git commit -m "Update Farcaster manifest with signing credentials"
-git push origin main
-```
+For Farcaster Frame integration, set these in your deployment platform:
 
-Vercel автоматически задеплоит обновления.
+\\\env
+NEXT_PUBLIC_FARCASTER_FID=your_fid_here
+NEXT_PUBLIC_APP_URL=https://your-deployed-domain.com
+\\\
 
-## 5️⃣ Тестирование в Warpcast
+##  Security Notes
 
-1. Откройте Warpcast
-2. Создайте новый Cast (пост)
-3. Нажмите на иконку Frame (появится после интеграции)
-4. Найдите "Batch EVM Wallet Generator" в каталоге
-5. Нажмите "Launch"
-6. Приложение загрузится в embed
-
-## ⚙️ Важные переменные окружения для Vercel
-
-В консоли Vercel добавьте переменные (если требуется):
-
-```
-NEXT_PUBLIC_RPC_ETHEREUM=https://cloudflare-eth.com
-NEXT_PUBLIC_RPC_BASE=https://mainnet.base.org
-```
-
-По умолчанию они уже настроены в коде, но можно переопределить.
-
-## 🔍 Отладка проблем
-
-### Приложение не загружается в Warpcast?
-
-- [ ] Проверьте что домен верифицирован в Developer Tools
-- [ ] Убедитесь что public/farcaster.json содержит корректные credentials
-- [ ] Проверьте что `.well-known/farcaster.json` доступен по домену
-- [ ] Очистите кеш в Warpcast (Settings → Clear Cache)
-
-### Баланс не загружается?
-
-- [ ] Проверьте консоль браузера (F12) на ошибки
-- [ ] Blockscout может быть перегружен (попробуйте позже)
-- [ ] Проверьте что адреса корректные
-
-### Приватные ключи не копируются?
-
-- Это может быть блокировка браузером
-- Попробуйте другой браузер или очистите permissions
-
-## 📊 Мониторинг
-
-В консоли Vercel можно отслеживать:
-- Ошибки деплоя
-- Performance метрики
-- Логи функций API
-- Bandwidth использование
-
-## 🚨 Важно: Безопасность
-
-**Никогда не коммитьте приватные ключи или чувствительные данные в .env файлы!**
-
-Все RPC endpoints - это публичные эндпоинты без ограничений.
-Все генерация ключей происходит на клиенте (браузер пользователя).
-
----
-
-✅ После этих шагов ваше приложение будет полностью интегрировано с Farcaster и доступно всем пользователям Warpcast!
+- Private keys are generated **only on the client-side**
+- No sensitive data is transmitted to the server
+- All environment variables starting with \NEXT_PUBLIC_\ are safe (public)
+- Never commit \.env.local\ with sensitive keys
