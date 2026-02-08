@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { UI_CONFIG } from '@/lib/constants';
@@ -13,34 +13,35 @@ interface GeneratorControlsProps {
 export function GeneratorControls({ onGenerate, isLoading, walletCount }: GeneratorControlsProps) {
   const [quantity, setQuantity] = useState<number>(UI_CONFIG.defaultWallets);
 
+  const buttonText = isLoading ? 'Generating' + ' ' + quantity + ' Wallets...' : 'Generate ' + quantity + ' Wallet' + (quantity !== 1 ? 's' : '');
+
   return (
-    <div className="bg-zinc-900/40 border border-zinc-800 rounded-lg p-6 backdrop-blur-sm">
-      <div className="space-y-4">
+    <div className='card-minimal'>
+      <div className='space-y-6'>
         {/* Title */}
         <div>
-          <h2 className="text-lg font-semibold text-zinc-100">Generate Wallets</h2>
-          <p className="text-sm text-zinc-400">All keys generated securely on your device</p>
+          <h2 className='text-lg font-semibold text-gray-900'>Generate Wallets</h2>
+          <p className='text-sm text-gray-500 mt-1'>All keys generated securely on your device</p>
         </div>
 
         {/* Quantity Slider */}
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <label htmlFor="quantity" className="text-sm font-medium text-zinc-300">
+          <div className='flex items-center justify-between mb-4'>
+            <label htmlFor='quantity' className='text-sm font-medium text-gray-700'>
               Number of Wallets
             </label>
-            <span className="text-lg font-mono text-indigo-400">{quantity}</span>
+            <span className='text-lg font-semibold text-gray-900'>{quantity}</span>
           </div>
           <input
-            id="quantity"
-            type="range"
+            id='quantity'
+            type='range'
             min={UI_CONFIG.minWallets}
             max={UI_CONFIG.maxWallets}
             value={quantity}
-            onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
-            disabled={isLoading}
-            className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer slider"
+            onChange={(e) => setQuantity(Number(e.target.value))}
+            className='w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500'
           />
-          <div className="flex items-center justify-between text-xs text-zinc-500 mt-1">
+          <div className='flex justify-between text-xs text-gray-500 mt-2'>
             <span>{UI_CONFIG.minWallets}</span>
             <span>{UI_CONFIG.maxWallets}</span>
           </div>
@@ -50,42 +51,18 @@ export function GeneratorControls({ onGenerate, isLoading, walletCount }: Genera
         <Button
           onClick={() => onGenerate(quantity)}
           loading={isLoading}
-          className="w-full text-base py-3"
+          className='w-full'
         >
-          Generate {quantity} Wallet{quantity !== 1 ? 's' : ''}
+          {buttonText}
         </Button>
 
-        {/* Stats */}
-        {walletCount > 0 && (
-          <div className="pt-2 border-t border-zinc-800">
-            <p className="text-sm text-zinc-400">
-              Generated: <span className="text-indigo-400 font-mono">{walletCount}</span>
-            </p>
-          </div>
-        )}
+        {/* Info */}
+        <div className='pt-4 border-t border-gray-200'>
+          <p className='text-xs text-gray-500 leading-relaxed'>
+            <span className='font-medium text-gray-700'> Security:</span> Private keys are generated only on your device and never transmitted to any server.
+          </p>
+        </div>
       </div>
-
-      <style>{`
-        input.slider::-webkit-slider-thumb {
-          appearance: none;
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          background: #818cf8;
-          cursor: pointer;
-          box-shadow: 0 0 8px rgba(129, 140, 248, 0.5);
-        }
-
-        input.slider::-moz-range-thumb {
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          background: #818cf8;
-          cursor: pointer;
-          box-shadow: 0 0 8px rgba(129, 140, 248, 0.5);
-          border: none;
-        }
-      `}</style>
     </div>
   );
 }
